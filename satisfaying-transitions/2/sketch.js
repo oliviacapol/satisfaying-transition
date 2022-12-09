@@ -14,7 +14,11 @@ let easeFill, easeTriangle;
 let liquidColor;
 let colorTarget;
 
+let progress = 0;
+let started = false;
+
 let sound;
+let boing;
 
 let states = {
   WATER_DROP: 0,
@@ -27,9 +31,11 @@ let currState = states.WATER_DROP;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
   angleMode(DEGREES);
 
-  sound = loadSound("crashaudio.mp3");
+  sound = loadSound("water.mp3");
+  boing = loadSound("boing-null.mp3");
 
   colorPalette = [
     color(215, 64, 67),
@@ -61,7 +67,7 @@ function setup() {
 
   easeTriangle = new Easing({
     from: 0,
-    to: 1,
+    to: 1.05,
     duration: 1000,
     easing: EASINGS.easeOutElastic,
   });
@@ -171,8 +177,8 @@ function draw() {
       fill(liquidColor);
 
       let x = centerX;
-      let y = lerp(height, centerY, t);
-      let s = lerp(0.2, 1, t);
+      let y = lerp(height, centerY + 35, t);
+      let s = lerp(1, 1.155, t);
 
       translate(x, y);
       scale(s);
@@ -186,7 +192,17 @@ function draw() {
         objSize / 2
       );
 
+      boing.play();
+
+      started = true;
       break;
+  }
+
+  if (started) progress += deltaTime / 1500;
+
+  if (progress >= 1) {
+    window.parent.postMessage("finished", "*");
+    noLoop();
   }
 }
 
@@ -220,7 +236,6 @@ function mousePressed() {
     colorTarget = colorPalette[waterDropped];
     waterDropped++;
     fillAmount = pow(map(waterDropped, 0, totalWaterDrops, 1, 0), 0.6);
-    sound.play();
 
     // console.log(fillAmount, pow(fillAmount, 0.5));
 
@@ -231,6 +246,8 @@ function mousePressed() {
     easeFill.start({
       to: fillY,
     });
+
+    sound.play();
 
     const radius = sceneSize / 2;
     const x = centerX;

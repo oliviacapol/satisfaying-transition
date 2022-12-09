@@ -1,13 +1,15 @@
 const duration = 300; // ms
 let activeEllipse = false;
+
 class RainbowSlider {
-  constructor({ color, way }) {
+  constructor({ color, way, sound }) {
     this.t = 0;
     this.color = color;
     this.dragging = false;
     this.way = way;
     this.angle = 0; // 0 -180
     this.complete = false;
+    this.sound = sound;
   }
 
   draw(x, y) {
@@ -20,10 +22,6 @@ class RainbowSlider {
     const mappedMouse = screenToWorld(drawingContext, mouseX, mouseY);
     const way = x > 0 ? 1 : -1;
 
-    // ellipse(hitDiameter / 2 ,0, 100)
-    // ellipse(, mappedMouse.y, 100)
-    // console.log();
-    // console.log(mappedMouse.x);
     if (this.dragging) {
       this.angle =
         180 +
@@ -34,20 +32,8 @@ class RainbowSlider {
     }
 
     if (this.complete) this.angle = 180;
-    // let angle = ;
     let angle = this.angle;
     angle = constrain(angle, 0, 180);
-
-    // console.log(angle);
-
-    // if (this.way === 1) {
-    //   if (angle > 90) angle = 180;
-    //   else if (angle >= 0) angle = 0.001;
-    //   else angle = constrain(-angle, 0, 180);
-    // } else {
-    //   if (angle >= 0) angle = 180 - 0.001;
-    //   else angle = constrain(-angle, 0, 180);
-    // }
 
     push();
 
@@ -59,14 +45,10 @@ class RainbowSlider {
     const arcX = x - offset;
     const arcY = 0;
 
-    // if (this.way === 1) {
-    //   arc(arcX, arcY, arcDim, arcDim, 360 - angle, 0);
-    // } else {
-    //   arc(arcX, arcY, arcDim, arcDim, 360 - angle, 0);
-    // }
     translate(arcX, arcY);
     scale(way, -1);
     arc(0, 0, arcDim, arcDim, 0, angle);
+
     pop();
 
     const normalizedTime = constrain(this.t / duration, 0, 1);
@@ -75,9 +57,6 @@ class RainbowSlider {
 
     const d = dist(dotX, dotY, mappedMouse.x, mappedMouse.y);
     const isHover = d < hitDiameter / 2;
-
-    // circle(dotX, dotY, hitDiameter);
-    fill(0);
 
     if (
       mouseIsPressed &&
@@ -89,15 +68,16 @@ class RainbowSlider {
       this.dragging = true;
       activeEllipse = true;
 
-      sound.play();
+      this.sound.play();
     } else if (!mouseIsPressed) {
       this.dragging = false;
       activeEllipse = false;
-      sound.stop();
+
+      this.sound.stop();
     }
 
     if (this.dragging) {
-      cursor("grabbing");
+      cursor("arrow");
     }
 
     if ((isHover && !activeEllipse && !this.complete) || this.dragging) {
