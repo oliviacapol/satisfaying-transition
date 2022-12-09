@@ -35,7 +35,7 @@ function setup() {
   angleMode(DEGREES);
 
   sound = loadSound("water.mp3");
-  boing = loadSound("boing-null.mp3");
+  boing = loadSound("boing.mp3");
 
   colorPalette = [
     color(215, 64, 67),
@@ -192,10 +192,12 @@ function draw() {
         objSize / 2
       );
 
-      boing.play();
+      if (!boing.isPlaying()) {
+        boing.play();
 
-      started = true;
-      break;
+        started = true;
+        break;
+      }
   }
 
   if (started) progress += deltaTime / 1500;
@@ -203,6 +205,7 @@ function draw() {
   if (progress >= 1) {
     window.parent.postMessage("finished", "*");
     noLoop();
+    boing.stop();
   }
 }
 

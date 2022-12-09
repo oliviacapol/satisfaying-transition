@@ -10,6 +10,8 @@ let thickness, groundLevel, rectWidth;
 let ease;
 let grow;
 
+let swoosh;
+
 let progress = 0;
 let started = false;
 
@@ -20,6 +22,10 @@ let states = {
 };
 
 let currState = states.PYRAMID;
+
+function prelaod() {
+  swoosh = loadSound("sfx/swoosh.mp3");
+}
 
 function setup() {
   const canvas = createCanvas(windowWidth, windowHeight);
@@ -42,6 +48,7 @@ function setup() {
   // //   );
 
   let engine = Matter.Engine.create();
+
   world = engine.world;
 
   const groundThick = 1000;
@@ -50,10 +57,10 @@ function setup() {
   rectWidth = thickness * 4;
 
   ease = new Easing({
-    duration: 1000 - ((objSize / 4.46) * 4) / 2,
-    from: centerY,
-    to: centerX,
-    easing: EASINGS.easeOutBounce,
+    duration: 4000,
+    from: 0,
+    to: 1,
+    easing: EASINGS.easeOutElastic,
   });
 
   ease.onEnd = function () {
@@ -180,7 +187,8 @@ function changeState(newState) {
   }
 }
 
-// function mouseClicked() {}
+// function mouseClicked() {
+// }
 
 function checkFinish() {
   const onScreenbricks = bricks.filter((brick) => {
@@ -199,6 +207,10 @@ function changeSecondState(newState) {
       ease.start({});
       break;
   }
+}
+
+function mouseClicked() {
+  swoosh.play();
 }
 
 function draw() {
@@ -248,7 +260,7 @@ function draw() {
     case states.SCALING:
       // const value = ease.update(deltaTime);
 
-      fill("red");
+      fill("black");
 
       // translate(-width / 18, -height / 4);
       // translate(-100, 0);
@@ -264,21 +276,33 @@ function draw() {
 
       changeState(states.RECTANGLE);
 
-      // rect(centerX, centerY, objSize, objSize / 4);
-
       break;
 
     case states.RECTANGLE:
-      const value = ease.update(deltaTime);
+      ease.update(deltaTime);
 
-      // translate(-width / 18, -height / 4);
-      // translate(-100, 0);
+      let t = ease.value;
 
-      // scale(value);
+      let x = lerp(centerX - rectWidth / 2, centerX - objSize / 2 - 70, t);
+      let y = lerp(groundLevel - thickness, centerY - 2 - objSize / 8, t);
+      let widthsize = lerp(rectWidth, objSize + 60 + 80, t);
+      let heightsize = lerp(thickness, objSize / 4 + 4, t);
 
-      rect(value, value, rectWidth, thickness);
+      // if (mouseIsPressed === true) {
+      //   swoosh.play();
+      // }
+
+      rect(x, y, widthsize, heightsize);
+
+      // rect(
+      //   centerX - objSize / 2 - 60,
+      //   centerY - 2 - objSize / 8,
+      //   objSize + 60,
+      //   objSize / 4 + 4
+      // );
 
       started = true;
+
       break;
   }
 
